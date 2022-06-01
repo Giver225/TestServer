@@ -9,10 +9,18 @@ c = db.cursor()
 
 # c.execute("""CREATE TABLE accounts (
 #     login text,
-#     password text
+#     password text,
+#     name text,
+#     status text,
+#     phone text,
+#     male text,
+#     date_of_birth date,
+#     email text
 # )""")
-c.execute('SELECT * FROM accounts')
-print(c.fetchall())
-
+c.execute('DELETE FROM accounts')
+c.execute("INSERT INTO accounts VALUES ('Goverd', '123', 'Danil', 'doctor', '88005553535', 'm', '2002-12-23', 'giver_225@mail.ru')")
+# c.execute('DELETE FROM accounts')
+# c.execute('SELECT * FROM accounts')
+# print(c.fetchall())
 db.commit()
 db.close()

@@ -23,10 +23,16 @@ app.config["BASE_URL"] = public_url
 
 api = Api()
 
-accounts = ["login", "password"]
+accounts = ["login", "password", "name", "status", "phone", "male", "date_of_birth", "email"]
 
 parser = reqparse.RequestParser()
 parser.add_argument("password", type=str)
+parser.add_argument("name", type=str)
+parser.add_argument("status", type=str)
+parser.add_argument("phone", type=str)
+parser.add_argument("male", type=str)
+parser.add_argument("date_of_birth", type=str)
+parser.add_argument("email", type=str)
 
 class Main(Resource):
     def get(self, login):
@@ -60,14 +66,14 @@ class Main(Resource):
             if i["login"] == login:
                 return 'This login already exists'
         args = parser.parse_args()
-        c.execute(f"INSERT INTO accounts VALUES ('{login}', '{args['password']}')")
+        c.execute(f"INSERT INTO accounts VALUES ('{login}', '{args['password']}', '{args['name']}', '{args['status']}', '{args['phone']}', '{args['male']}', '{args['date_of_birth']}', '{args['email']}')")
         db.commit()
         return self.get("0")
 
     def put(self, login):
         self.delete(login)
         args = parser.parse_args()
-        c.execute(f"INSERT INTO accounts VALUES ('{login}', '{args['password']}')")
+        c.execute(f"INSERT INTO accounts VALUES ('{login}', '{args['password']}', '{args['name']}', '{args['status']}', '{args['phone']}', '{args['male']}', '{args['date_of_birth']}', '{args['email']}')")
         db.commit()
         return self.get("0")
 
