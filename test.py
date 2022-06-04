@@ -26,6 +26,7 @@ api = Api()
 accounts = ["login", "password", "name", "status", "phone", "male", "date_of_birth", "email"]
 
 parser = reqparse.RequestParser()
+parser.add_argument("login", type=str)
 parser.add_argument("password", type=str)
 parser.add_argument("name", type=str)
 parser.add_argument("status", type=str)
@@ -62,18 +63,19 @@ class Main(Resource):
 
     def post(self, login):
         all_data = self.get("0")
-        for i in all_data:
-            if i["login"] == login:
-                return 'This login already exists'
         args = parser.parse_args()
-        c.execute(f"INSERT INTO accounts VALUES ('{login}', '{args['password']}', '{args['name']}', '{args['status']}', '{args['phone']}', '{args['male']}', '{args['date_of_birth']}', '{args['email']}')")
+        for i in all_data:
+            if i["login"] == args['login']:
+                return 'This login already exists'
+
+        c.execute(f"INSERT INTO accounts VALUES ('{args['login']}', '{args['password']}', '{args['name']}', '{args['status']}', '{args['phone']}', '{args['male']}', '{args['date_of_birth']}', '{args['email']}')")
         db.commit()
         return self.get("0")
 
     def put(self, login):
         self.delete(login)
         args = parser.parse_args()
-        c.execute(f"INSERT INTO accounts VALUES ('{login}', '{args['password']}', '{args['name']}', '{args['status']}', '{args['phone']}', '{args['male']}', '{args['date_of_birth']}', '{args['email']}')")
+        c.execute(f"INSERT INTO accounts VALUES ('{args['login']}', '{args['password']}', '{args['name']}', '{args['status']}', '{args['phone']}', '{args['male']}', '{args['date_of_birth']}', '{args['email']}')")
         db.commit()
         return self.get("0")
 
