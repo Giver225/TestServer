@@ -24,7 +24,7 @@ app.config["BASE_URL"] = public_url
 api = Api()
 
 accounts = ["login", "password", "name", "status", "phone", "male", "date_of_birth", "email"]
-
+entry_list = ["doctor", "patient", "time"]
 parser = reqparse.RequestParser()
 parser.add_argument("login", type=str)
 parser.add_argument("password", type=str)
@@ -34,6 +34,7 @@ parser.add_argument("phone", type=str)
 parser.add_argument("male", type=str)
 parser.add_argument("date_of_birth", type=str)
 parser.add_argument("email", type=str)
+
 
 class Main(Resource):
     def get(self, login):
@@ -70,14 +71,61 @@ class Main(Resource):
 
         c.execute(f"INSERT INTO accounts VALUES ('{args['login']}', '{args['password']}', '{args['name']}', '{args['status']}', '{args['phone']}', '{args['male']}', '{args['date_of_birth']}', '{args['email']}')")
         db.commit()
-        return self.get("0")
+        return self.get(args['login'])
 
     def put(self, login):
         self.delete(login)
         args = parser.parse_args()
         c.execute(f"INSERT INTO accounts VALUES ('{args['login']}', '{args['password']}', '{args['name']}', '{args['status']}', '{args['phone']}', '{args['male']}', '{args['date_of_birth']}', '{args['email']}')")
         db.commit()
-        return self.get("0")
+        return self.get(args['login'])
+
+
+class Entry(Resource):
+    def get(self, login):
+        if login == "0":
+            c.execute("SELECT * FROM entry")
+            result = c.fetchall()
+            for i in range(len(result)):
+                result[i] = dict(zip(entry_list, result[i]))
+            return result
+        else:
+            try:
+                c.execute(f"SELECT * FROM entry WHERE patient = '{login}' OR doctor = '{login}'")
+                result = c.fetchall()
+                if len(result) > 1:
+                    for i in range(len(result)):
+                        result[i] = dict(zip(entry_list, result[i]))
+                    return result
+                result = list(result[0])
+                result = dict(zip(entry_list, result))
+                return result
+            except:
+                return 'Incorrect Key'
+
+    def delete(self, login):
+        try:
+            c.execute(f"DELETE FROM entry WHERE patient = '{login}'")
+            db.commit()
+            return self.get("0")
+        except:
+            return 'Incorrect key'
+
+    def post(self, login):
+        parser = reqparse.RequestParser()
+        parser.add_argument("doctor", type=str)
+        parser.add_argument("patient", type=str)
+        parser.add_argument("time", type=str)
+        args = parser.parse_args()
+        c.execute(f"INSERT INTO entry VALUES ('{args['doctor']}', '{args['patient']}', '{args['time']}')")
+        db.commit()
+        return self.get(args['patient'])
+
+    def put(self, login):
+        args = parser.parse_args()
+        c.execute(f"INSERT INTO entry VALUES ('{args['doctor']}', '{args['patient']}', '{args['time']}')")
+        db.commit()
+        return self.get(args['patient'])
 
 
 # Define Flask routes
@@ -88,6 +136,7 @@ def index():
 
 
 api.add_resource(Main, "/api/accounts/<string:login>")
+api.add_resource(Entry, "/api/entry/<string:login>")
 api.init_app(app)
 
 # Start the Flask server in a new thread
